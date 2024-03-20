@@ -1,8 +1,8 @@
 <?php
+namespace GDO\DogNinja;
 
 use GDO\Core\GDO_Module;
 use GDO\Core\GDT_UInt;
-use GDO\DogNinja\DOG_Ninja;
 use GDO\DogNinja\Method\Update;
 
 /**
@@ -38,7 +38,10 @@ final class Module_DogNinja extends GDO_Module
         ];
     }
 
-    public
+    public function cfgLastScroll(): int
+    {
+        return $this->getConfigValue('last_scroll');
+    }
 
 
 }
