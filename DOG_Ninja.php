@@ -16,4 +16,11 @@ final class DOG_Ninja extends GDO
         ];
     }
 
+	public function renderCLI(): string
+    {
+        $text = $this->gdoVar('scroll_content');
+        return t('msg_dog_ninja_scroll', [$this->getID(), $text]);
+    }
+
+
 }

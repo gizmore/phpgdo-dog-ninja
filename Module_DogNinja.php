@@ -1,6 +1,7 @@
 <?php
 namespace GDO\DogNinja;
 
+use GDO\Core\GDO_DBException;
 use GDO\Core\GDO_Module;
 use GDO\Core\GDT_UInt;
 use GDO\DogNinja\Method\Update;
@@ -26,9 +27,17 @@ final class Module_DogNinja extends GDO_Module
         ];
     }
 
+    /**
+     * @throws GDO_DBException
+     */
     public function onInstall(): void
     {
-        Update::dogNinja();
+//        Update::dogNinja();
+    }
+
+    public function onLoadLanguage(): void
+    {
+        $this->loadLanguage('lang/ninja');
     }
 
     public function getConfig(): array

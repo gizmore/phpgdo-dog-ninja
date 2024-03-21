@@ -1,20 +1,30 @@
 <?php
 namespace GDO\DogNinja\Method;
 
+use GDO\Core\Application;
+use GDO\Core\GDO_DBException;
+use GDO\Core\GDT_Hook;
 use GDO\Cronjob\MethodCronjob;
 use GDO\DogNinja\DOG_Ninja;
 use GDO\DogNinja\Module_DogNinja;
 use GDO\Net\GDT_HTTP;
-use function RingCentral\Psr7\str;
 
 final class Update extends MethodCronjob
 {
 
-    public static function getNinjaURL(int $number): void
+    public static function getNinjaURL(int $number): string
     {
         return "https://raw.githubusercontent.com/gizmore/anonymous-zen-book/master/{$number}";
     }
 
+    public function announce(DOG_Ninja $scroll): void
+    {
+        GDT_Hook::callWithIPC('NinjaScrollCreated', $scroll->getID());
+    }
+
+    /**
+     * @throws GDO_DBException
+     */
     public static function dogNinja(): void
     {
         self::make()->run();
@@ -25,6 +35,9 @@ final class Update extends MethodCronjob
         return $this->runHourly();
     }
 
+    /**
+     * @throws GDO_DBException
+     */
     public function run(): void
     {
         $mod = Module_DogNinja::instance();
@@ -36,21 +49,29 @@ final class Update extends MethodCronjob
                 break;
             }
             $mod->increaseConfigVar('last_scroll');
+            $scroll++;
         }
     }
 
-    private function fetchNextScroll(int $scroll): bool
+    /**
+     * @throws GDO_DBException
+     */
+    private function fetchNextScroll(int $number): bool
     {
-        $url = self::getNinjaURL($scroll);
+        $url = self::getNinjaURL($number);
         $content = GDT_HTTP::make()->var($url)->render();
         if (str_starts_with($content, '404'))
         {
             return false;
         }
-        DOG_Ninja::blank([
-            'scroll_id' => (string)$scroll,
-            'scroll_content' => $content,,
-        ])->insert();
+        $scroll = DOG_Ninja::blank([
+            'scroll_id' => (string)$number,
+            'scroll_content' => $content,
+        ])->softReplace();
+        if (!Application::instance()->isInstall())
+        {
+            $this->announce($scroll);
+        }
         return true;
     }
 
