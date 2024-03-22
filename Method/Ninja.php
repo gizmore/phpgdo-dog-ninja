@@ -27,7 +27,7 @@ final class Ninja extends DOG_Command
     public function gdoParameters(): array
     {
         return [
-            GDT_Object::make('id')->table(DOG_Ninja::table()),
+            GDT_Object::make('id')->table(DOG_Ninja::table())->positional(),
         ];
     }
 
